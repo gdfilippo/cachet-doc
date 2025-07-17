@@ -78,7 +78,7 @@ initialize_system() {
     # Search for the key in the .env file with optional leading "#" and trailing spaces around "="
     if grep -E -q "^\s*#?\s*$key\s*=.*"  "$env_file"; then
       # Replace the line with the desired format (remove "#" and set the value)
-      sed -E "s/^\s*#?\s*$key\s*=.*/${key} = $value/" -i "$env_file"
+      sed -E "s/^\s*#?\s*$key\s*=.*/${key}=$value/" -i "$env_file"
     fi
   done < <(env)
 
@@ -98,7 +98,16 @@ migrate_db() {
   php artisan migrate ${force} --no-interaction
 }
 
+ensure_app_key() {
+  if [[ -z "${APP_KEY:-}" || "${APP_KEY}" == "null" ]]; then
+    echo "Generating APP_KEY ..."
+    php artisan key:generate --no-interaction --force
+    export APP_KEY=$(grep ^APP_KEY= /var/www/html/.env | cut -d= -f2-)
+  fi
+}
+
 start_system() {
+  ensure_app_key 
   initialize_system
   migrate_db
   php artisan config:cache

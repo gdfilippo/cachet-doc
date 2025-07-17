@@ -1,7 +1,8 @@
 FROM php:8.3-fpm
 
 EXPOSE 8000
-CMD ["/sbin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/entrypoint.sh"]
+CMD ["php-fpm", "-F"]
 
 ENV COMPOSER_VERSION 2.8.4
 
@@ -46,5 +47,9 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/nginx-site.conf /etc/nginx/conf.d/default.conf
 RUN cp /var/www/html/.env.example /var/www/html/.env
 COPY entrypoint.sh /sbin/entrypoint.sh
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends dos2unix && \
+    dos2unix /sbin/entrypoint.sh && \
+    chmod 755 /sbin/entrypoint.sh
 
 RUN mkdir /var/cache/nginx && chmod 777 /var/cache/nginx
