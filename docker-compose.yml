@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     volumes:
       - cachet_storage:/var/www/html/storage
-      - nginx_logs:/var/log/ngin
+      - nginx_logs:/var/log/nginx
 
   db:
     image: mysql:8.0
